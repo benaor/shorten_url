@@ -16,6 +16,18 @@
         //SHORT URL
         $shortcut = crypt($url, time() );
 
+        //Is SHORT URL Already exist
+        $bdd = new PDO('mysql:host=localhost;dbname=shorten_url;charset=utf8','root','root');
+        $req = $bdd->prepare('SELECT COUNT(*) AS x FROM links WHERE url = ?');
+        $req->execute(array($req));
+
+        while($result = $req->fetch()){
+
+            if($result['x'] != 0){
+                header('location: ../?error=true&messsage=Adresse déjà raccourcie');
+                exit();
+            }
+        }
 
         
     }
