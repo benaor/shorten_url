@@ -9,7 +9,7 @@
         if( !filter_var($url, FILTER_VALIDATE_URL) ){
 
             //redirect and display error message
-            header('location:../?error=true&message=Adresse URL non valide');
+            header('location:../index.php/?error=true&message=Adresse URL non valide');
             exit();
         }
 
@@ -19,17 +19,22 @@
         //Is SHORT URL Already exist
         $bdd = new PDO('mysql:host=localhost;dbname=shorten_url;charset=utf8','root','root');
         $req = $bdd->prepare('SELECT COUNT(*) AS x FROM links WHERE url = ?');
-        $req->execute(array($req));
+        $req->execute(array($url));
 
         while($result = $req->fetch()){
 
             if($result['x'] != 0){
-                header('location: ../?error=true&messsage=Adresse déjà raccourcie');
+                header('location:../index.php/?error=true&message=Adresse déjà raccourcie');
                 exit();
             }
         }
 
-        
+        //Sending URL In BDD
+        $req = $bdd->prepare('INSERT INTO links(url, shortcut) VALUES(?, ?)'); 
+        $req->execute(array($url, $shortcut));
+
+        header('location:../index.php/?short='.$shortcut);
+        exit();
     }
 ?>
 
@@ -40,7 +45,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="design/style.css">
+    <link rel="stylesheet" href="../design/style.css">
     <link rel="icon" href="design/pictures/favico.png">
 </head>
 
@@ -53,7 +58,7 @@
 
             <!-- header -->
             <header>
-                <img src="design/pictures/logo.png" alt="logo" id="logo">
+                <img src="../design/pictures/logo.png" alt="logo" id="logo">
             </header>
 
             <!-- Value proposition -->
@@ -77,11 +82,20 @@
                     <b>
                         <?php
                             echo htmlspecialchars($_GET['message']);
-                            }
+                            
                         ?>
                     </b>
                 </div>
             </div>
+
+            <?php } else if(isset($_GET['short'])) { ?>
+					<div class="center">
+						<div id="result">
+							<b>URL RACCOURCIE : </b>
+							http://localhost/?q=<?php echo htmlspecialchars($_GET['short']); ?>
+						</div>
+					</div>
+				<?php } ?>
 
         </div>
     </section>
@@ -93,10 +107,10 @@
         <div class="container">
 
             <h3>Ces marques nous font confiance</h3>
-            <img src="design/pictures/1.png" alt="1" class="picture">
-            <img src="design/pictures/2.png" alt="2" class="picture">
-            <img src="design/pictures/3.png" alt="3" class="picture">
-            <img src="design/pictures/4.png" alt="4" class="picture">
+            <img src="../design/pictures/1.png" alt="1" class="picture">
+            <img src="../design/pictures/2.png" alt="2" class="picture">
+            <img src="../design/pictures/3.png" alt="3" class="picture">
+            <img src="../design/pictures/4.png" alt="4" class="picture">
 
         </div>
 
@@ -104,7 +118,7 @@
 
     <!-- FOOTER -->
     <footer>
-        <img src="design/pictures/logo2.png" alt="logo" id="logo"><br>
+        <img src="../design/pictures/logo2.png" alt="logo" id="logo"><br>
         2018 © Bitly<br>
         <a href="#">Contact</a> - <a href="#">À propos</a>
     </footer>
