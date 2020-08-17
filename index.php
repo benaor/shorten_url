@@ -13,6 +13,11 @@
             exit();
         }
 
+        //SHORT URL
+        $shortcut = crypt($url, time() );
+
+
+        
     }
 ?>
 
