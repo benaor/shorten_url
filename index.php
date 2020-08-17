@@ -1,4 +1,20 @@
+<!-- If form is submit -->
+<?php
+    if( isset( $_POST['url'] )){
 
+        //stock URL in variable
+        $url = $_POST['url'];
+
+        //Check if $url is a validate URL 
+        if( !filter_var($url, FILTER_VALIDATE_URL) ){
+
+            //redirect and display error message
+            header('location:../?error=true&message=Adresse URL non valide');
+            exit();
+        }
+
+    }
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,6 +48,23 @@
                 <input type="url" name="url" placeholder="entrez l'url a raccourcir">
                 <input type="submit" value="raccourcir">
             </form>
+
+            <?php
+                //If variable GET error and message exist
+                if(isset($_GET['error']) && isset($_GET['message']) ){
+                    
+            ?>
+
+            <div class="center">
+                <div id="result">
+                    <b>
+                        <?php
+                            echo htmlspecialchars($_GET['message']);
+                            }
+                        ?>
+                    </b>
+                </div>
+            </div>
 
         </div>
     </section>
