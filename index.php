@@ -1,2 +1,3 @@
 <?php
 //Starting project ...
+echo 'hello world';
