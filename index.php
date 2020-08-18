@@ -16,6 +16,7 @@ if (isset($_GET['q'])) {
         if ($result['x'] != 1) {
             header('location:../index.php/?error=true&message=Adresse URL Inconnu. Verifiez le lien raccourci !');
             exit();
+            
         } else if ($result['x'] == 1) {
 
             // If url shortcut exist ... REDIRECTION 
@@ -26,6 +27,7 @@ if (isset($_GET['q'])) {
 
                 header('location: ' . $result['url']);
                 exit();
+
             }
         }
     }
