@@ -1,41 +1,73 @@
-<!-- If form is submit -->
 <?php
-    if( isset( $_POST['url'] )){
+// If variable q exist
+if (isset($_GET['q'])) {
 
-        //stock URL in variable
-        $url = $_POST['url'];
+    //variable shortcut 
+    $shortcut = htmlspecialchars($_GET['q']);
 
-        //Check if $url is a validate URL 
-        if( !filter_var($url, FILTER_VALIDATE_URL) ){
+    //Connexion to BDD
+    $bdd = new PDO('mysql:host=localhost;dbname=shorten_url;charset=utf8', 'root', 'root');
+    $req = $bdd->prepare('SELECT COUNT(*) AS x FROM links WHERE shortcut = ?');
+    $req->execute(array($shortcut));
 
-            //redirect and display error message
-            header('location:../index.php/?error=true&message=Adresse URL non valide');
+    while ($result = $req->fetch()) {
+
+        // If URL shortcut don't exist 
+        if ($result['x'] != 1) {
+            header('location:../index.php/?error=true&message=Adresse URL Inconnu. Verifiez le lien raccourci !');
             exit();
-        }
+        } else if ($result['x'] == 1) {
 
-        //SHORT URL
-        $shortcut = crypt($url, time() );
+            // If url shortcut exist ... REDIRECTION 
+            $req = $bdd->prepare('SELECT * FROM links WHERE shortcut = ?');
+            $req->execute(array($shortcut));
 
-        //Is SHORT URL Already exist
-        $bdd = new PDO('mysql:host=localhost;dbname=shorten_url;charset=utf8','root','root');
-        $req = $bdd->prepare('SELECT COUNT(*) AS x FROM links WHERE url = ?');
-        $req->execute(array($url));
+            while ($result = $req->fetch()) {
 
-        while($result = $req->fetch()){
-
-            if($result['x'] != 0){
-                header('location:../index.php/?error=true&message=Adresse déjà raccourcie');
+                header('location: ' . $result['url']);
                 exit();
             }
         }
+    }
+}
 
-        //Sending URL In BDD
-        $req = $bdd->prepare('INSERT INTO links(url, shortcut) VALUES(?, ?)'); 
-        $req->execute(array($url, $shortcut));
+// If form is submit
+if (isset($_POST['url'])) {
 
-        header('location:../index.php/?short='.$shortcut);
+    //stock URL in variable
+    $url = $_POST['url'];
+
+    //Check if $url is a validate URL 
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+
+        //redirect and display error message
+        header('location:../index.php/?error=true&message=Adresse URL non valide');
         exit();
     }
+
+    //SHORT URL
+    $shortcut = crypt($url, rand());
+
+    //Is SHORT URL Already exist
+    $bdd = new PDO('mysql:host=localhost;dbname=shorten_url;charset=utf8', 'root', 'root');
+    $req = $bdd->prepare('SELECT COUNT(*) AS x FROM links WHERE url = ?');
+    $req->execute(array($url));
+
+    while ($result = $req->fetch()) {
+
+        if ($result['x'] != 0) {
+            header('location:../index.php/?error=true&message=Adresse déjà raccourcie');
+            exit();
+        }
+    }
+
+    //Sending URL In BDD
+    $req = $bdd->prepare('INSERT INTO links(url, shortcut) VALUES(?, ?)');
+    $req->execute(array($url, $shortcut));
+
+    header('location:../index.php/?short=' . $shortcut);
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -72,30 +104,30 @@
             </form>
 
             <?php
-                //If variable GET error and message exist
-                if(isset($_GET['error']) && isset($_GET['message']) ){
-                    
+            //If variable GET error and message exist
+            if (isset($_GET['error']) && isset($_GET['message'])) {
+
             ?>
 
-            <div class="center">
-                <div id="result">
-                    <b>
-                        <?php
+                <div class="center">
+                    <div id="result">
+                        <b>
+                            <?php
                             echo htmlspecialchars($_GET['message']);
-                            
-                        ?>
-                    </b>
-                </div>
-            </div>
 
-            <?php } else if(isset($_GET['short'])) { ?>
-					<div class="center">
-						<div id="result">
-							<b>URL RACCOURCIE : </b>
-							http://localhost/?q=<?php echo htmlspecialchars($_GET['short']); ?>
-						</div>
-					</div>
-				<?php } ?>
+                            ?>
+                        </b>
+                    </div>
+                </div>
+
+            <?php } else if (isset($_GET['short'])) { ?>
+                <div class="center">
+                    <div id="result">
+                        <b>URL RACCOURCIE : </b>
+                        http://localhost/php/shorten_url/index.php/?q=<?php echo htmlspecialchars($_GET['short']); ?>
+                    </div>
+                </div>
+            <?php } ?>
 
         </div>
     </section>
@@ -120,7 +152,8 @@
     <footer>
         <img src="../design/pictures/logo2.png" alt="logo" id="logo"><br>
         2018 © Bitly<br>
-        <a href="#">Contact</a> - <a href="#">À propos</a>
+        <a href="#">Contact</a> - <a href="#">À propos</a> <br>
+        <p>Réalisé dans le cadre de la <a href="https://www.udemy.com/course/php-et-mysql-la-formation-ultime/">formation ULTIME</a> </p>
     </footer>
 
 
